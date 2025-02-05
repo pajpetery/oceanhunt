@@ -73,7 +73,8 @@
             'shark.png': {3: 100, 4: 500, 5: 1500}
         };
         const wild = "seashell.png";
-        const symbols = Object.keys(payoutMultipliers).concat(wild);
+        const symbols = Object.keys(payoutMultipliers);
+        const allSymbols = symbols.concat(wild);
         
         function createReels() {
             let rows = ["row1", "row2", "row3"];
@@ -84,7 +85,7 @@
                     let reel = document.createElement("div");
                     reel.classList.add("reel");
                     let img = document.createElement("img");
-                    img.src = symbols[Math.floor(Math.random() * symbols.length)];
+                    img.src = i === 0 ? symbols[Math.floor(Math.random() * symbols.length)] : allSymbols[Math.floor(Math.random() * allSymbols.length)];
                     reel.appendChild(img);
                     reelRow.appendChild(reel);
                 }
@@ -105,8 +106,7 @@
             rows.forEach((row, rowIndex) => {
                 let reelRow = document.getElementById(row).children;
                 for (let i = 0; i < reelRow.length; i++) {
-                    let availableSymbols = i === 0 ? symbols.slice(0, -1) : symbols;
-                    let randomSymbol = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
+                    let randomSymbol = i === 0 ? symbols[Math.floor(Math.random() * symbols.length)] : allSymbols[Math.floor(Math.random() * allSymbols.length)];
                     reelRow[i].children[0].src = randomSymbol;
                     board[rowIndex].push(randomSymbol);
                 }
