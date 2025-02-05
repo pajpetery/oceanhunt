@@ -58,69 +58,39 @@
 
     <script>
         let balance = 100000;
-        const symbols = [
-            "10.png", "J.png", "Q.png", "K.png", "A.png",
-            "turtle.png", "pufferfish.png", "octopus.png", "lanternfish.png", "shark.png", "seashell.png"
-        ];
+        const payoutMultipliers = {
+            '10.png': {3: 5, 4: 10, 5: 50},
+            'J.png': {3: 5, 4: 15, 5: 60},
+            'Q.png': {3: 10, 4: 20, 5: 80},
+            'K.png': {3: 10, 4: 30, 5: 100},
+            'A.png': {3: 15, 4: 50, 5: 150},
+            'turtle.png': {3: 30, 4: 80, 5: 500},
+            'pufferfish.png': {3: 35, 4: 100, 5: 600},
+            'octopus.png': {3: 40, 4: 150, 5: 800},
+            'lanternfish.png': {3: 50, 4: 300, 5: 1000},
+            'shark.png': {3: 100, 4: 500, 5: 1500}
+        };
         const wild = "seashell.png";
+        const symbols = Object.keys(payoutMultipliers).concat(wild);
+        const winningLines = [
+            [[1,0], [1,1], [1,2], [1,3], [1,4]],
+            [[0,0], [0,1], [0,2], [0,3], [0,4]],
+            [[2,0], [2,1], [2,2], [2,3], [2,4]],
+            [[0,0], [1,1], [2,2], [1,3], [0,4]],
+            [[2,0], [1,1], [0,2], [1,3], [2,4]],
+            [[0,0], [0,1], [1,2], [2,3], [2,4]],
+            [[2,0], [2,1], [1,2], [0,3], [0,4]],
+            [[0,0], [0,1], [1,2], [1,3], [2,4]],
+            [[2,0], [2,1], [1,2], [1,3], [0,4]],
+            [[0,0], [1,1], [1,2], [1,3], [2,4]],
+            [[1,0], [1,1], [1,2], [0,3], [0,4]],
+            [[0,0], [0,1], [1,2], [1,3], [2,4]]
+        ];
         
-        function createReels() {
-            let rows = ["row1", "row2", "row3"];
-            rows.forEach(row => {
-                let reelRow = document.getElementById(row);
-                reelRow.innerHTML = "";
-                for (let i = 0; i < 5; i++) {
-                    let reel = document.createElement("div");
-                    reel.classList.add("reel");
-                    let img = document.createElement("img");
-                    img.src = "10.png";
-                    reel.appendChild(img);
-                    reelRow.appendChild(reel);
-                }
-            });
-        }
-
-        function spin() {
-            let bet = parseInt(document.getElementById('bet').value);
-            if (bet > balance) {
-                alert("Not enough balance!");
-                return;
-            }
-            balance -= bet;
-            document.getElementById('balance').innerText = balance;
-            
-            let board = [[], [], []];
-            let rows = ["row1", "row2", "row3"];
-            rows.forEach((row, rowIndex) => {
-                let reelRow = document.getElementById(row).children;
-                for (let i = 0; i < reelRow.length; i++) {
-                    let availableSymbols = i === 0 ? symbols.slice(0, -1) : symbols;
-                    let randomSymbol = availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
-                    reelRow[i].children[0].src = randomSymbol;
-                    board[rowIndex].push(randomSymbol);
-                }
-            });
-            checkWinnings(board, bet);
-        }
-
         function checkWinnings(board, bet) {
             let winnings = 0;
             let betPerLine = bet / 12;
             let winMessage = "";
-            let winningLines = [
-                [[1,0], [1,1], [1,2], [1,3], [1,4]], // Line 1
-                [[0,0], [0,1], [0,2], [0,3], [0,4]], // Line 2
-                [[2,0], [2,1], [2,2], [2,3], [2,4]], // Line 3
-                [[0,0], [1,1], [2,2], [1,3], [0,4]], // Line 4
-                [[2,0], [1,1], [0,2], [1,3], [2,4]], // Line 5
-                [[0,0], [0,1], [1,2], [2,3], [2,4]], // Line 6
-                [[2,0], [2,1], [1,2], [0,3], [0,4]], // Line 7
-                [[0,0], [0,1], [1,2], [1,3], [2,4]], // Line 8
-                [[2,0], [2,1], [1,2], [1,3], [0,4]], // Line 9
-                [[0,0], [1,1], [1,2], [1,3], [2,4]], // Line 10
-                [[1,0], [1,1], [1,2], [0,3], [0,4]], // Line 11
-                [[0,0], [0,1], [1,2], [1,3], [2,4]]  // Line 12
-            ];
             
             winningLines.forEach(line => {
                 let symbol = board[line[0][0]][line[0][1]];
@@ -133,9 +103,8 @@
                         break;
                     }
                 }
-                if (count >= 3) {
-                    let multiplier = count === 3 ? 5 : count === 4 ? 10 : 50;
-                    winnings += betPerLine * multiplier;
+                if (count >= 3 && payoutMultipliers[symbol]) {
+                    winnings += betPerLine * payoutMultipliers[symbol][count];
                     winMessage += `Winning Line (${count} symbols): ` + line.slice(0, count).map(([row, col]) => `<img src='${board[row][col]}' width='40' height='40'>`).join(" ") + "<br>";
                 }
             });
@@ -148,15 +117,6 @@
                 document.getElementById('win-message').innerText = "😢 No win this time. Try again!";
             }
         }
-
-        function restart() {
-            balance = 100000;
-            document.getElementById('balance').innerText = balance;
-            document.getElementById('win-message').innerText = "";
-            alert("Game restarted!");
-        }
-
-        createReels();
     </script>
 </body>
 </html>
