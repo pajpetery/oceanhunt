@@ -114,6 +114,13 @@
         }
 
         function spin() {
+            let bet = parseInt(document.getElementById('bet').value);
+            if (bet > balance) {
+                alert("Not enough balance!");
+                return;
+            }
+            balance -= bet;
+            document.getElementById('balance').innerText = balance;
             let board = createReels();
             checkWinnings(board);
         }
