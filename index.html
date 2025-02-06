@@ -110,17 +110,42 @@
 
         function spin() {
             createReels();
+            checkWinnings();
         }
 
-        function restart() {
-            balance = 100000;
-            document.getElementById('balance').innerText = balance;
-            document.getElementById('win-message').innerText = "";
-            alert("Game restarted!");
-            createReels();
-        }
+        function checkWinnings() {
+            let winnings = 0;
+            let bet = parseInt(document.getElementById('bet').value);
+            let betPerLine = bet / 12;
+            let winMessage = "";
 
-        createReels();
+            winningLines.forEach(line => {
+                let firstSymbol = document.getElementById(`row${line[0][0]+1}`).children[line[0][1]].children[0].alt;
+                if (firstSymbol === wild) return;
+                let count = 1;
+                for (let i = 1; i < line.length; i++) {
+                    let [row, col] = line[i];
+                    let currentSymbol = document.getElementById(`row${row+1}`).children[col].children[0].alt;
+                    if (currentSymbol === firstSymbol || currentSymbol === wild) {
+                        count++;
+                    } else {
+                        break;
+                    }
+                }
+                if (count >= 3 && payoutMultipliers[firstSymbol]) {
+                    winnings += betPerLine * payoutMultipliers[firstSymbol][count];
+                    winMessage += `Winning Line (${count} symbols): ${firstSymbol}<br>`;
+                }
+            });
+            
+            if (winnings > 0) {
+                balance += winnings;
+                document.getElementById('balance').innerText = balance;
+                document.getElementById('win-message').innerHTML = `🎉 You won $${Math.floor(winnings)}!<br>${winMessage}`;
+            } else {
+                document.getElementById('win-message').innerText = "😢 No win this time. Try again!";
+            }
+        }
     </script>
 </body>
 </html>
