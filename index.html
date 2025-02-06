@@ -61,34 +61,61 @@
     <script>
         let balance = 100000;
         const payoutMultipliers = {
-            '10.png': {3: 5, 4: 10, 5: 50},
-            'J.png': {3: 5, 4: 15, 5: 60},
-            'Q.png': {3: 10, 4: 20, 5: 80},
-            'K.png': {3: 10, 4: 30, 5: 100},
-            'A.png': {3: 15, 4: 50, 5: 150},
-            'turtle.png': {3: 30, 4: 80, 5: 500},
-            'pufferfish.png': {3: 35, 4: 100, 5: 600},
-            'octopus.png': {3: 40, 4: 150, 5: 800},
-            'lanternfish.png': {3: 50, 4: 300, 5: 1000},
-            'shark.png': {3: 100, 4: 500, 5: 1500}
+            '10': {3: 5, 4: 10, 5: 50},
+            'J': {3: 5, 4: 15, 5: 60},
+            'Q': {3: 10, 4: 20, 5: 80},
+            'K': {3: 10, 4: 30, 5: 100},
+            'A': {3: 15, 4: 50, 5: 150},
+            'turtle': {3: 30, 4: 80, 5: 500},
+            'pufferfish': {3: 35, 4: 100, 5: 600},
+            'octopus': {3: 40, 4: 150, 5: 800},
+            'lanternfish': {3: 50, 4: 300, 5: 1000},
+            'shark': {3: 100, 4: 500, 5: 1500}
         };
-        const wild = "seashell.png";
+        const wild = "seashell";
         const symbols = Object.keys(payoutMultipliers);
         const allSymbols = symbols.concat(wild);
-        const winningLines = [
-            [[1,0], [1,1], [1,2], [1,3], [1,4]],
-            [[0,0], [0,1], [0,2], [0,3], [0,4]],
-            [[2,0], [2,1], [2,2], [2,3], [2,4]],
-            [[0,0], [1,1], [2,2], [1,3], [0,4]],
-            [[2,0], [1,1], [0,2], [1,3], [2,4]],
-            [[0,0], [0,1], [1,2], [2,3], [2,4]],
-            [[2,0], [2,1], [1,2], [0,3], [0,4]],
-            [[0,0], [0,1], [1,2], [1,3], [2,4]],
-            [[2,0], [2,1], [1,2], [1,3], [0,4]],
-            [[0,0], [1,1], [1,2], [1,3], [2,4]],
-            [[1,0], [1,1], [1,2], [0,3], [0,4]],
-            [[0,0], [0,1], [1,2], [1,3], [2,4]]
-        ];
+
+        function createReels() {
+            let rows = ["row1", "row2", "row3"];
+            rows.forEach(row => {
+                let reelRow = document.getElementById(row);
+                reelRow.innerHTML = "";
+                for (let i = 0; i < 5; i++) {
+                    let reel = document.createElement("div");
+                    reel.classList.add("reel");
+                    let img = document.createElement("img");
+                    let symbol = symbols[Math.floor(Math.random() * symbols.length)];
+                    img.src = `images/${symbol}.png`;
+                    img.alt = symbol;
+                    reel.appendChild(img);
+                    reelRow.appendChild(reel);
+                }
+            });
+        }
+
+        function spin() {
+            let bet = parseInt(document.getElementById('bet').value);
+            if (bet > balance) {
+                alert("Not enough balance!");
+                return;
+            }
+            balance -= bet;
+            document.getElementById('balance').innerText = balance;
+            
+            let board = [[], [], []];
+            let rows = ["row1", "row2", "row3"];
+            rows.forEach((row, rowIndex) => {
+                let reelRow = document.getElementById(row).children;
+                for (let i = 0; i < reelRow.length; i++) {
+                    let symbol = symbols[Math.floor(Math.random() * symbols.length)];
+                    reelRow[i].children[0].src = `images/${symbol}.png`;
+                    reelRow[i].children[0].alt = symbol;
+                    board[rowIndex].push(symbol);
+                }
+            });
+            checkWinnings(board, bet);
+        }
 
         function checkWinnings(board, bet) {
             let winnings = 0;
@@ -109,7 +136,7 @@
                 }
                 if (count >= 3 && payoutMultipliers[firstSymbol]) {
                     winnings += betPerLine * payoutMultipliers[firstSymbol][count];
-                    winMessage += `Winning Line (${count} symbols): ` + line.slice(0, count).map(([row, col]) => `<img src='${board[row][col]}' width='40' height='40'>`).join(" ") + "<br>";
+                    winMessage += `Winning Line (${count} symbols): ` + line.slice(0, count).map(([row, col]) => `<img src='images/${board[row][col]}.png' width='40' height='40'>`).join(" ") + "<br>";
                 }
             });
             
@@ -121,6 +148,16 @@
                 document.getElementById('win-message').innerText = "😢 No win this time. Try again!";
             }
         }
+
+        function restart() {
+            balance = 100000;
+            document.getElementById('balance').innerText = balance;
+            document.getElementById('win-message').innerText = "";
+            alert("Game restarted!");
+            createReels();
+        }
+
+        createReels();
     </script>
 </body>
 </html>
