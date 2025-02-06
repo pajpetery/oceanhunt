@@ -75,6 +75,7 @@
         const wild = "seashell";
         const symbols = Object.keys(payoutMultipliers);
         const allSymbols = symbols.concat(wild);
+        
         const winningLines = [
             [[1,0], [1,1], [1,2], [1,3], [1,4]],
             [[0,0], [0,1], [0,2], [0,3], [0,4]],
@@ -89,12 +90,14 @@
             [[1,0], [1,1], [1,2], [0,3], [0,4]],
             [[0,0], [0,1], [1,2], [1,3], [2,4]]
         ];
-
+        
         function createReels() {
             let rows = ["row1", "row2", "row3"];
-            rows.forEach(row => {
+            let board = [];
+            rows.forEach((row, rowIndex) => {
                 let reelRow = document.getElementById(row);
                 reelRow.innerHTML = "";
+                board[rowIndex] = [];
                 for (let i = 0; i < 5; i++) {
                     let reel = document.createElement("div");
                     reel.classList.add("reel");
@@ -104,29 +107,30 @@
                     img.alt = symbol;
                     reel.appendChild(img);
                     reelRow.appendChild(reel);
+                    board[rowIndex].push(symbol);
                 }
             });
+            return board;
         }
 
         function spin() {
-            createReels();
-            checkWinnings();
+            let board = createReels();
+            checkWinnings(board);
         }
 
-        function checkWinnings() {
+        function checkWinnings(board) {
             let winnings = 0;
             let bet = parseInt(document.getElementById('bet').value);
             let betPerLine = bet / 12;
             let winMessage = "";
 
             winningLines.forEach(line => {
-                let firstSymbol = document.getElementById(`row${line[0][0]+1}`).children[line[0][1]].children[0].alt;
+                let firstSymbol = board[line[0][0]][line[0][1]];
                 if (firstSymbol === wild) return;
                 let count = 1;
                 for (let i = 1; i < line.length; i++) {
                     let [row, col] = line[i];
-                    let currentSymbol = document.getElementById(`row${row+1}`).children[col].children[0].alt;
-                    if (currentSymbol === firstSymbol || currentSymbol === wild) {
+                    if (board[row][col] === firstSymbol || board[row][col] === wild) {
                         count++;
                     } else {
                         break;
@@ -146,6 +150,8 @@
                 document.getElementById('win-message').innerText = "😢 No win this time. Try again!";
             }
         }
+
+        createReels();
     </script>
 </body>
 </html>
